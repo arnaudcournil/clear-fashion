@@ -72,6 +72,9 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
     else if(filter === "new") {
       result = result.filter(product => (new Date() - new Date(product.released)) / (1000 * 60 * 60 * 24) < 14);
     }
+    else if(filter === "favorite") {
+      result = result.filter(product => (JSON.parse(localStorage.getItem("favorites")) || []).includes(product.uuid));
+    };
 
     var meta = {
       currentPage: page,
@@ -79,6 +82,7 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
       pageSize: size,
       count: result.length
     };
+    
     if(sortBy === "price-asc") {
       result.sort((a, b) => a.price - b.price);
     }
@@ -107,9 +111,9 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
       return new Date(a.released) > new Date(b.released) ? a : b;
     }).released;
 
-    p50 = result.sort((a, b) => a.price - b.price)[Math.floor(result.length / 2)].price;
-    p90 = result.sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.9)].price;
-    p95 = result.sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.95)].price;
+    p50 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length / 2)].price;
+    p90 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.9)].price;
+    p95 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.95)].price;
 
     var result = result.slice((page - 1) * size, page * size);
     return {result, meta};
@@ -127,14 +131,17 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
 const renderProducts = products => {
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
+  let i = -1;
   const template = products
     .map(product => {
+      i++;
       return `
       <div class="product" id=${product.uuid}>
         <span>${product.brand}</span>
         <a href="${product.link}" target="_blank">${product.name}</a>
-        <span>${product.price}</span>
-      </div>
+        <span>${product.price} </span><span id="${product.uuid}-fav">`
+      + ((JSON.parse(localStorage.getItem("favorites")) || []).includes(product.uuid) ? `❤️ <button onclick=deleteToFavorite("` + product.uuid + `")>Delete from favorite</button>` : `<button onclick=addToFavorite(currentProducts[${i}].uuid)>Add to favorite</button>`) + `
+      </span></div>
     `;
     })
     .join('');
@@ -233,13 +240,20 @@ async function fetchBrands() {
   }
 }
 
-/**
- * Declaration of all Listeners
- */
+function addToFavorite(product) {
+  var favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  favorites.push(product);
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+  document.getElementById(product + "-fav").innerHTML = `❤️ <button onclick=deleteToFavorite("` + product + `")>Delete from favorite</button>`;
+}
 
-/**
- * Select the number of products to display
- */
+function deleteToFavorite(product) {
+  var favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  favorites = favorites.filter(favorite => favorite != product);
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+  document.getElementById(product + "-fav").innerHTML = `<button onclick=addToFavorite("` + product + `")>Add to favorite</button>`;
+}
+
 selectShow.addEventListener('change', async (event) => {
   const products = await fetchProducts(currentPagination.currentPage, parseInt(event.target.value), brandSelect.value, sortSelect.value, showOnlySelect.value);
 
