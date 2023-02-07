@@ -22,6 +22,10 @@ let currentProducts = [];
 let currentPagination = {};
 let brandsCount = 0;
 let recentProducts = 0;
+let lastRelease = NaN;
+let p50 = 0;
+let p90 = 0;
+let p95 = 0;
 
 // instantiate the selectors
 const selectShow = document.querySelector('#show-select');
@@ -99,6 +103,14 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
 
     recentProducts = result.filter(product => (new Date() - new Date(product.released)) / (1000 * 60 * 60 * 24) < 14).length;
 
+    lastRelease = result.reduce(function(a,b) {
+      return new Date(a.released) > new Date(b.released) ? a : b;
+    }).released;
+
+    p50 = result.sort((a, b) => a.price - b.price)[Math.floor(result.length / 2)].price;
+    p90 = result.sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.9)].price;
+    p95 = result.sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.95)].price;
+
     var result = result.slice((page - 1) * size, page * size);
     return {result, meta};
     
@@ -120,7 +132,7 @@ const renderProducts = products => {
       return `
       <div class="product" id=${product.uuid}>
         <span>${product.brand}</span>
-        <a href="${product.link}">${product.name}</a>
+        <a href="${product.link}" target="_blank">${product.name}</a>
         <span>${product.price}</span>
       </div>
     `;
@@ -177,12 +189,28 @@ const renderRecentProducts = () => {
   spanNbRecentProducts.innerHTML = recentProducts;
 };
 
+const renderLastRelease = () => {
+  const spanLastReleased = document.querySelector('#spanLastReleased');
+  spanLastReleased.innerHTML = lastRelease;
+};
+
+const renderStats = () => {
+  const spanP50 = document.querySelector('#spanP50');
+  spanP50.innerHTML = p50;
+  const spanP90 = document.querySelector('#spanP90');
+  spanP90.innerHTML = p90;
+  const spanP95 = document.querySelector('#spanP95');
+  spanP95.innerHTML = p95;
+};
+
 const render = (products, pagination) => {
   renderProducts(products);
   renderPagination(pagination);
   renderIndicators(pagination);
   renderBrandsCount();
   renderRecentProducts();
+  renderLastRelease();
+  renderStats();
 };
 
 async function fetchBrands() {
