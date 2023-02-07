@@ -20,6 +20,8 @@ Search for available brands list
 // current products on the page
 let currentProducts = [];
 let currentPagination = {};
+let brandsCount = 0;
+let recentProducts = 0;
 
 // instantiate the selectors
 const selectShow = document.querySelector('#show-select');
@@ -58,6 +60,7 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
       return {currentProducts, currentPagination};
     }
     var result = body.data.result;
+    
     // filters
     if(filter === "sale") {
       result = result.filter(product => product.price < 50);
@@ -84,6 +87,17 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
     else if(sortBy === "date-desc") {
       result.sort((a, b) => new Date(a.released) - new Date(b.released));
     }
+
+    brandsCount = 0
+    result.reduce((acc, product) => {
+      if(!acc[product.brand]) {
+        acc[product.brand] = 1;
+        brandsCount++;
+      }
+      return acc;
+    }, {});
+
+    recentProducts = result.filter(product => (new Date() - new Date(product.released)) / (1000 * 60 * 60 * 24) < 14).length;
 
     var result = result.slice((page - 1) * size, page * size);
     return {result, meta};
@@ -153,10 +167,22 @@ const renderBrands = brands => {
   brandSelect.innerHTML = options;
 };
 
+const renderBrandsCount = () => {
+  const spanNbBrands = document.querySelector('#nbBrands');
+  spanNbBrands.innerHTML = brandsCount;
+};
+
+const renderRecentProducts = () => {
+  const spanNbRecentProducts = document.querySelector('#nbRecentProducts');
+  spanNbRecentProducts.innerHTML = recentProducts;
+};
+
 const render = (products, pagination) => {
   renderProducts(products);
   renderPagination(pagination);
   renderIndicators(pagination);
+  renderBrandsCount();
+  renderRecentProducts();
 };
 
 async function fetchBrands() {
