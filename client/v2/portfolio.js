@@ -27,6 +27,8 @@ const selectPage = document.querySelector('#page-select');
 const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
 const brandSelect = document.querySelector('#brand-select');
+const sortSelect = document.querySelector('#sort-select');
+const showOnlySelect = document.querySelector('#showOnly-select');
 
 /**
  * Set global value
@@ -44,10 +46,10 @@ const setCurrentProducts = ({result, meta}) => {
  * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
-const fetchProducts = async (page = 1, size = 12, brand = "all") => {
+const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price-asc", filter = "all") => {
   try {
     const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}` + (brand !== "all" ? `&brand=${brand}` : "")
+      `https://clear-fashion-api.vercel.app?size=999` + (brand !== "all" ? `&brand=${brand}` : "")
     );
     const body = await response.json();
 
@@ -55,8 +57,37 @@ const fetchProducts = async (page = 1, size = 12, brand = "all") => {
       console.error(body);
       return {currentProducts, currentPagination};
     }
+    var result = body.data.result;
+    // filters
+    if(filter === "sale") {
+      result = result.filter(product => product.price < 50);
+    }
+    else if(filter === "new") {
+      result = result.filter(product => (new Date() - new Date(product.released)) / (1000 * 60 * 60 * 24) < 14);
+    }
 
-    return body.data;
+    var meta = {
+      currentPage: page,
+      pageCount: Math.ceil(result.length / size),
+      pageSize: size,
+      count: result.length
+    };
+    if(sortBy === "price-asc") {
+      result.sort((a, b) => a.price - b.price);
+    }
+    else if(sortBy === "price-desc") {
+      result.sort((a, b) => b.price - a.price);
+    }
+    else if(sortBy === "date-asc") {
+      result.sort((a, b) => new Date(b.released) - new Date(a.released));
+    }
+    else if(sortBy === "date-desc") {
+      result.sort((a, b) => new Date(a.released) - new Date(b.released));
+    }
+
+    var result = result.slice((page - 1) * size, page * size);
+    return {result, meta};
+    
   } catch (error) {
     console.error(error);
     return {currentProducts, currentPagination};
@@ -129,7 +160,6 @@ const render = (products, pagination) => {
 };
 
 async function fetchBrands() {
-  // fetch brands in https://clear-fashion-api.vercel.app/?size=222
   try {
     const response = await fetch(
       'https://clear-fashion-api.vercel.app/brands'
@@ -157,21 +187,35 @@ async function fetchBrands() {
  * Select the number of products to display
  */
 selectShow.addEventListener('change', async (event) => {
-  const products = await fetchProducts(currentPagination.currentPage, parseInt(event.target.value));
+  const products = await fetchProducts(currentPagination.currentPage, parseInt(event.target.value), brandSelect.value, sortSelect.value, showOnlySelect.value);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
 
 selectPage.addEventListener('change', async (event) => {
-  const products = await fetchProducts(parseInt(event.target.value), currentPagination.pageSize);
+  const products = await fetchProducts(parseInt(event.target.value), currentPagination.pageSize, brandSelect.value, sortSelect.value, showOnlySelect.value);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
 
 brandSelect.addEventListener('change', async (event) => {
-  const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize, event.target.value);
+  const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize, event.target.value, sortSelect.value, showOnlySelect.value);
+
+  setCurrentProducts(products);
+  render(currentProducts, currentPagination);
+});
+
+sortSelect.addEventListener('change', async (event) => {
+  const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize, brandSelect.value, event.target.value, showOnlySelect.value);
+
+  setCurrentProducts(products);
+  render(currentProducts, currentPagination);
+});
+
+showOnlySelect.addEventListener('change', async (event) => {
+  const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize, brandSelect.value, sortSelect.value, event.target.value);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
