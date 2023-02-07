@@ -97,23 +97,34 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
     }
 
     brandsCount = 0
-    result.reduce((acc, product) => {
-      if(!acc[product.brand]) {
-        acc[product.brand] = 1;
-        brandsCount++;
-      }
-      return acc;
-    }, {});
+    if(result.length > 0){
+      result.reduce((acc, product) => {
+        if(!acc[product.brand]) {
+          acc[product.brand] = 1;
+          brandsCount++;
+        }
+        return acc;
+      }, {});
+    };
 
     recentProducts = result.filter(product => (new Date() - new Date(product.released)) / (1000 * 60 * 60 * 24) < 14).length;
 
-    lastRelease = result.reduce(function(a,b) {
+    lastRelease = result.length > 0 ? result.reduce(function(a,b) {
       return new Date(a.released) > new Date(b.released) ? a : b;
-    }).released;
+    }).released : "Nan";
 
-    p50 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length / 2)].price;
-    p90 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.9)].price;
-    p95 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.95)].price;
+    if(result.length > 0)
+    {
+      p50 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length / 2)].price;
+      p90 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.9)].price;
+      p95 = [...result].sort((a, b) => a.price - b.price)[Math.floor(result.length * 0.95)].price;
+    }
+    else
+    {
+      p50 = 0;
+      p90 = 0;
+      p95 = 0;
+    }
 
     var result = result.slice((page - 1) * size, page * size);
     return {result, meta};
