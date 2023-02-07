@@ -21,15 +21,12 @@
       </div>
       <div id="filters">
         <div id="showOnly">
-          <label for="showOnly-select">Show only:</label>
-          <select name="showOnly" id="showOnly-select">
-            <option value="all">All</option>
-            <option value="sale">Reasonable price (i.e less than 50€)</option>
-            <option value="new">
-              Recently released (i.e less than 2 weeks)
-            </option>
-            <option value="favorite">Favorite</option>
-          </select>
+          <label>Show only:</label>
+          <input type="checkbox" id="showOnly-select-sale">Reasonable price (i.e less than 50€)</input>
+          <input type="checkbox" id="showOnly-select-new">
+            Recently released (i.e less than 2 weeks)
+          </input>
+          <input type="checkbox" id="showOnly-select-favorite">Favorite</input>
         </div>
         <div id="brand">
           <label for="brand-select">By brands:</label>
