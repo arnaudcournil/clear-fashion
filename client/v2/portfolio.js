@@ -37,6 +37,7 @@ const sortSelect = document.querySelector('#sort-select');
 const showOnlySelectSale = document.querySelector('#showOnly-select-sale');
 const showOnlySelectNew = document.querySelector('#showOnly-select-new');
 const showOnlySelectFavorite = document.querySelector('#showOnly-select-favorite');
+const productDiv = document.querySelectorAll(".product");
 
 /**
  * Set global value
@@ -260,11 +261,16 @@ function addToFavorite(product) {
   document.getElementById(product + "-fav").innerHTML = `❤️ <button onclick=deleteToFavorite("` + product + `")>Delete from favorite</button>`;
 }
 
-function deleteToFavorite(product) {
+async function deleteToFavorite(product) {
   var favorites = JSON.parse(localStorage.getItem("favorites")) || [];
   favorites = favorites.filter(favorite => favorite != product);
   localStorage.setItem("favorites", JSON.stringify(favorites));
   document.getElementById(product + "-fav").innerHTML = `<button onclick=addToFavorite("` + product + `")>Add to favorite</button>`;
+  if(showOnlySelectFavorite.checked){
+    const products = await fetchProducts(currentPagination.currentPage, currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, showOnlySelectFavorite.checked]);
+    setCurrentProducts(products);
+    render(currentProducts, currentPagination);
+  }
 }
 
 selectShow.addEventListener('change', async (event) => {
@@ -315,6 +321,8 @@ showOnlySelectNew.addEventListener('change', async (event) => {
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
+
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   const products = await fetchProducts();
