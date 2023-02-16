@@ -29,7 +29,7 @@ const parse = data => {
   items.push(...$('li.grid__item')
     .map((i, element) => {
       const image = "https:" + $(element)
-        .find('img')[0].attribs['src'];
+        .find('img')[0].attribs['src']
       var images = Object.values($(element).find('.media-pool img.motion-reduce').map((i, e) => e.attribs['data-src']));
       var link = "https://shop.circlesportswear.com" + $(element)
         .find('h3.h5 .full-unstyled-link')
@@ -64,7 +64,7 @@ const parse = data => {
       else if(colorArray.length > 1) {
         for(i = 1; i < colorArray.length; i++) {
           var item = {
-            image: "https://" + imagesFinal[i],
+            image: "https:" + imagesFinal[i],
             link: link + colorArrayFinalUrl[i],
             name: name + " " + colorArray[i],
             price: price,
