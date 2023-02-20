@@ -5,9 +5,10 @@ const circlesportswear = require('./eshops/circlesportswearbrand');
 
 const link = [
   "https://shop.circlesportswear.com/collections/all", //tout le site
-  "https://www.montlimart.com/99-vetements", //tout le site
-  "https://www.montlimart.com/14-chaussures",
-  "https://www.montlimart.com/15-accessoires",
+  //"https://www.montlimart.com/99-vetements", //tout le site
+  //"https://www.montlimart.com/14-chaussures",
+  //"https://www.montlimart.com/15-accessoires",
+  "montlimart",//tout le site
   "dedicatedbrand"//tout le site
 ]
 
@@ -29,9 +30,12 @@ async function sandbox (eshop = undefined, number = -1) {
   else
   {
     try {
-      console.log(`🕵️‍♀️  browsing ${eshop} eshop`);
       var products = "";
-      if(eshop.includes('montlimart')){
+      if(eshop == 'montlimart'){
+        link.push(...await montlimartbrand.getLinks());
+        return [];
+      }
+      else if(eshop.includes('montlimart')){
         products = await montlimartbrand.scrape(eshop);
       }
       else if(eshop == 'dedicatedbrand'){
@@ -48,6 +52,7 @@ async function sandbox (eshop = undefined, number = -1) {
         console.log('eshop not found');
         process.exit(1);
       }
+      console.log(`🕵️‍♀️  browsing ${eshop} eshop`);
       console.log(products);
       console.log('done ' + products.length + ' products found');
       if(number == -1)

@@ -82,6 +82,7 @@ module.exports.getProducts = async () => {
 
     if (response.ok) {
       const body = await response.json();
+      console.log(body['products']);
       const products = body['products'].filter(
         data => Object.keys(data).length > 0
       );

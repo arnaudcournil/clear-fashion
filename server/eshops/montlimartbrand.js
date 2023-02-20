@@ -92,3 +92,27 @@ module.exports.scrape = async url => {
     return null;
   }
 };
+
+module.exports.getLinks = async () => {
+  try {
+    const response = await fetch("https://www.montlimart.com/");
+
+    if (response.ok) {
+      const body = await response.text();
+      const $ = cheerio.load(body);
+      const links = $('.sub .a-niveau1')
+        .map((i, element) => {
+          return $(element).attr('href');
+        })
+        .get();
+      return links.filter(link => !link.includes("a-propos"));
+    }
+
+    console.error(response);
+
+    return null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
