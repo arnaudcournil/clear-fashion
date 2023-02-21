@@ -92,7 +92,8 @@ module.exports.getProducts = async () => {
           const link = "https://www.dedicatedbrand.com/en/" + data['canonicalUri'];
           const name = data['name'];
           const price = data['price']['priceAsNumber'];
-          const scrapDate = new Date().toDateString();
+          var today = new Date().toLocaleString().substr(0, 10).split("/")
+          const scrapDate = today[1] + "-" + today[0] + "-" + today[2];
           const brand = "Dedicated";
           const uuid = uuidv4();
           return {image, link, name, price, scrapDate, brand, uuid};

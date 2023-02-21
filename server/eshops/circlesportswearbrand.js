@@ -63,12 +63,13 @@ const parse = data => {
       }
       else if(colorArray.length > 1) {
         for(i = 1; i < colorArray.length; i++) {
+          var today = new Date().toLocaleString().substr(0, 10).split("/")
           var item = {
             image: "https:" + imagesFinal[i],
             link: link + colorArrayFinalUrl[i],
             name: name + " " + colorArray[i],
             price: price,
-            scrapDate: new Date().toDateString(),
+            scrapDate: today[1] + "-" + today[0] + "-" + today[2],
             brand: "Circle Sportswear",
             uuid: uuidv4()
           };
@@ -77,7 +78,8 @@ const parse = data => {
         name = name + " " + colorArray[0];
         link += colorArrayFinalUrl[0];
       }
-          const scrapDate = new Date().toDateString();
+          var today = new Date().toLocaleString().substr(0, 10).split("/")
+          const scrapDate = today[1] + "-" + today[0] + "-" + today[2];
           const brand = "Circle Sportswear";
           const uuid = uuidv4();
           return {image, link, name, price, scrapDate, brand, uuid};

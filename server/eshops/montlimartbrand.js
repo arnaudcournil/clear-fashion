@@ -60,7 +60,8 @@ const parse = async data => {
           .find('.price')
           .text()
       );
-      const scrapDate = new Date().toDateString();
+      var today = new Date().toLocaleString().substr(0, 10).split("/")
+      const scrapDate = today[1] + "-" + today[0] + "-" + today[2];
       const brand = "Montlimart";
       const uuid = uuidv4();
       return {image, link, name, price, scrapDate, brand, uuid};
