@@ -18,17 +18,24 @@ async function connectMongoDb(){
 
 async function productsPushMongoDb(){
     await connectMongoDb();
-    console.log('Deleting all products from MongoDB ...');
-    await collection.deleteMany({});
     console.log('Pushing new products to MongoDB ...');
     let rawdata = fs.readFileSync('products.json');
-    const products = JSON.parse(rawdata);
+    let products = JSON.parse(rawdata);
     products.map(product => {
         product._id = product.uuid;
         delete product.uuid;
     });
-    const result = await collection.insertMany(products);    
-    console.log(result);
+    const alredyExist = await collection.find({}).toArray();
+    products = products.filter(product => !alredyExist.some(product2 => product2._id == product._id));
+    if(products.length != 0)
+    {
+        const result = await collection.insertMany(products);
+        console.log(result);
+    }
+    else
+    {
+        console.log("No new products");
+    }
     process.exit(0);
 }
 
@@ -48,5 +55,5 @@ async function fetchProducts(brand = undefined, lessThan = undefined, sortedByPr
     process.exit(0);
 }
 
-//productsPushMongoDb();
-fetchProducts("Dedicated", 10 ,true, false, false);//brand, lessThan, sortedByPrice, sortedByDate, scrapedLessThanTwoWeeksAgo
+productsPushMongoDb();
+//fetchProducts("Dedicated", 10 ,true, false, false);//brand, lessThan, sortedByPrice, sortedByDate, scrapedLessThanTwoWeeksAgo

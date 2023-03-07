@@ -21,7 +21,7 @@ async function sandbox (eshop = undefined, number = -1) {
       allProducts.push(...await sandbox(link[i], i));
     }
     const fs = require('fs');
- 
+    allProducts = allProducts.filter((v,i,a)=>a.findIndex(t=>(t.uuid === v.uuid))===i);//suppression des doublons
     let data = JSON.stringify(allProducts);
     fs.writeFileSync('products.json', data);
     console.log("Products in the json file: " + allProducts.length);
