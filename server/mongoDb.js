@@ -7,7 +7,7 @@ const MONGODB_DB_NAME = 'clearfashion';
 var client, db, collection;
 
 async function connectMongoDb(){
-    var auth = fs.readFileSync('../../auth.json');
+    var auth = fs.readFileSync('auth.json');
     auth = JSON.parse(auth);
     MONGODB_URI = auth.MONGODB_URI;
     console.log('Connecting to MongoDB ...');
@@ -49,4 +49,4 @@ async function fetchProducts(brand = undefined, lessThan = undefined, sortedByPr
 }
 
 //productsPushMongoDb();
-fetchProducts("Dedicated", 10 ,true, false, true);//brand, lessThan, sortedByPrice, sortedByDate, scrapedLessThanTwoWeeksAgo
+fetchProducts("Dedicated", 10 ,true, false, false);//brand, lessThan, sortedByPrice, sortedByDate, scrapedLessThanTwoWeeksAgo
