@@ -51,9 +51,21 @@ async function fetchProducts(brand = undefined, lessThan = undefined, sortedByPr
     if (sortedByDate) result = result.sort({scrapDate: -1});
     result = await result.toArray();
     if (scrapedLessThanTwoWeeksAgo) result = result.filter(product => new Date(product.scrapDate) > new Date(Date.now() - 14 * 24 * 60 * 60 * 1000));
-    console.log(result);
-    process.exit(0);
+    return result;
 }
 
-productsPushMongoDb();
+async function fetchProductsByUuid(uuid){
+    await connectMongoDb();
+    console.log('Fetching products from MongoDB ...');
+    var result = "none";
+    result = await collection.find({_id: uuid}).toArray();
+    return result;
+}
+
+module.exports = {
+    productsPushMongoDb,
+    fetchProducts,
+    fetchProductsByUuid
+}
+//productsPushMongoDb();
 //fetchProducts("Dedicated", 10 ,true, false, false);//brand, lessThan, sortedByPrice, sortedByDate, scrapedLessThanTwoWeeksAgo
