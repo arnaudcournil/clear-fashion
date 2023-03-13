@@ -46,22 +46,6 @@ nothing to commit, working tree clean
 ❯ git pull upstream master
 ```
 
-3. **Check the terminal output for the command `node sandbox-db.js`**
-
-```sh
-❯ cd /path/to/workspace/clear-fashion/server
-## install new dependencies
-❯ yarn
-## or ❯ npm install
-❯ node sandbox-db.js
-```
-
-<img src="./img/5-sandbox-db.png"/>
-
-**sandox** - in programming - usually refers to the execution of your programs for independent evaluation, monitoring or testing.
-
-It means when we call `node sandbox-db.js`, we want to test some piece of codes related to the db in insolation.
-
 3. **Check the terminal output for the command `node api.js`**
 
 ```sh
