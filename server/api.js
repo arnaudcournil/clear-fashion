@@ -21,7 +21,7 @@ app.get('/', (request, response) => {
 
 app.get('/products/search', async (request, response) => {
   console.log("Requete : /products/search, params : ", request.query);
-  response.send("ok");
+  response.send({"ok" : true});
   var brand = request.query.brand;
   var lessThan = parseFloat(request.query.price);
   var limit = request.query.limit;
