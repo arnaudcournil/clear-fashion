@@ -42,7 +42,7 @@ async function fetchProducts(brand = null, lessThan = null, sortedByPrice = fals
     console.log('Fetching products from MongoDB ...');
     var result = "none";
     var query = {};
-    if (brand !== null) query.brand = brand;
+    if (brand != null) query.brand = brand;
     if (lessThan !== null) query.price = {$lt: lessThan};
     return query;
     result = await collection.find(query);
