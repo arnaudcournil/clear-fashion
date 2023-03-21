@@ -25,7 +25,7 @@ app.get('/products/search', async (request, response) => {
   var lessThan = parseFloat(request.query.price);
   var limit = request.query.limit;
 
-  var products = await MongoClient.fetchProducts(brand, lessThan, limit);
+  var products = await MongoClient.fetchProducts(brand, lessThan);
 
   var result = products.slice(0, limit);
 
