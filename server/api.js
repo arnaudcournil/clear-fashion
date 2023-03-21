@@ -23,7 +23,7 @@ app.get('/products/search', async (request, response) => {
   console.log("Requete : /products/search, params : ", request.query);
   var brand = request.query.brand;
   if(!brand) var brand = null;
-  var lessThan = parseFloat(request.query.price);
+  var lessThan = null;//parseFloat(request.query.price);
   var limit = parseInt(request.query.limit);
   var products = await MongoClient.fetchProducts(brand, lessThan);
   var result = products;
