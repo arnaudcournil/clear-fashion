@@ -16,7 +16,7 @@ app.use(helmet());
 app.options('*', cors());
 
 app.get('/', (request, response) => {
-  response.send({'ack': process.env.mongoDB});
+  response.send({'ack': true});
 });
 
 app.get('/products/search', async (request, response) => {
