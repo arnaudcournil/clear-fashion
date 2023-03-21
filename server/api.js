@@ -15,8 +15,19 @@ app.use(helmet());
 
 app.options('*', cors());
 
-app.get('/', (request, response) => {
-  response.send({'ack': true});
+app.get('', async(request, response) => {
+  console.log("Requete : /products/search, params : ", request.query);
+  var brand = request.query.brand;
+  if(!brand) var brand = null;
+  if(request.query.price)var lessThan = parseFloat(request.query.price);
+  else var lessThan = null;
+  if(request.query.limit)var limit = parseInt(request.query.limit);
+  else var limit = null;
+  var products = await MongoClient.fetchProducts(brand, lessThan);
+  var result = products;
+  var result = limit !== null ? products.slice(0, limit) : products;
+
+  response.send(result);
 });
 
 app.get('/products/search', async (request, response) => {
