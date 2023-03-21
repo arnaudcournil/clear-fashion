@@ -60,6 +60,6 @@ app.listen(PORT);
 console.log(`📡 Running on port ${PORT}`);
 
 while(true){
-    await MongoClient.productsPushMongoDb();
-    await new Promise(resolve => setTimeout(resolve, 1000 * 3600 * 24));
+    MongoClient.productsPushMongoDb();
+    new Promise(resolve => setTimeout(resolve, 1000 * 3600 * 24));
 }
