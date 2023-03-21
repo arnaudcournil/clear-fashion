@@ -7,16 +7,7 @@ const MONGODB_DB_NAME = 'clearfashion';
 var client, db, collection;
 
 async function connectMongoDb(){
-    //test if auth.json exists
-    if (fs.existsSync('auth.json')) {
-        var auth = fs.readFileSync('auth.json');
-        auth = JSON.parse(auth);
-        MONGODB_URI = auth.MONGODB_URI;
-    }
-    else
-    {
-        MONGODB_URI = process.env.mongoDB;
-    }
+    MONGODB_URI = process.env.mongoDB;
     console.log('Connecting to MongoDB ...');
     client = await MongoClient.connect(MONGODB_URI, {'useNewUrlParser': true});
     db =  client.db(MONGODB_DB_NAME)
