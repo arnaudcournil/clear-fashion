@@ -2,6 +2,8 @@ const { connect } = require('http2');
 const {MongoClient} = require('mongodb');
 const fs = require('fs');
 
+const sandbox = require('./sandbox');
+
 var MONGODB_URI = "";
 const MONGODB_DB_NAME = 'clearfashion';
 var client, db, collection;
@@ -17,8 +19,7 @@ async function connectMongoDb(){
 async function productsPushMongoDb(){
     await connectMongoDb();
     console.log('Pushing new products to MongoDB ...');
-    let rawdata = fs.readFileSync('products.json');
-    let products = JSON.parse(rawdata);
+    let products = await sandbox.sandbox();
     products.map(product => {
         product._id = product.uuid;
         delete product.uuid;
