@@ -58,8 +58,3 @@ app.get('/products/*', async (request, response) => {
 app.listen(PORT);
 
 console.log(`📡 Running on port ${PORT}`);
-
-while(true){
-    MongoClient.productsPushMongoDb();
-    new Promise(resolve => setTimeout(resolve, 1000 * 3600 * 24));
-}
