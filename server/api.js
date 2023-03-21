@@ -24,12 +24,13 @@ app.get('/products/search', async (request, response) => {
   var brand = request.query.brand;
   var lessThan = parseFloat(request.query.price);
   var limit = request.query.limit;
-
+  response.send({brand, lessThan, limit});
+  /*
   var products = await MongoClient.fetchProducts(brand, lessThan);
-  response.send(products);
   var result = limit !== undefined ? products.slice(0, limit) : products;
 
   response.send(result);
+  */
 });
 
 app.get('/products/*', async (request, response) => {
