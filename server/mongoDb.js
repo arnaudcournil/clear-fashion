@@ -37,13 +37,13 @@ async function productsPushMongoDb(){
     process.exit(0);
 }
 
-async function fetchProducts(brand = undefined, lessThan = undefined, sortedByPrice = false, sortedByDate = false, scrapedLessThanTwoWeeksAgo = false){
+async function fetchProducts(brand = undefined, lessThan = -1, sortedByPrice = false, sortedByDate = false, scrapedLessThanTwoWeeksAgo = false){
     await connectMongoDb();
     console.log('Fetching products from MongoDB ...');
     var result = "none";
     var query = {};
     if (brand != undefined) query.brand = brand;
-    if (lessThan != undefined) query.price = {$lt: lessThan};
+    if (lessThan != -1) query.price = {$lt: lessThan};
     result = await collection.find(query);
     if (sortedByPrice) result = result.sort({price: 1});
     if (sortedByDate) result = result.sort({scrapDate: -1});

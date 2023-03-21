@@ -21,14 +21,13 @@ app.get('/', (request, response) => {
 
 app.get('/products/search', async (request, response) => {
   console.log("Requete : /products/search, params : ", request.query);
-  console.log(response.query.brand);
-  var brand = request.query.brand;
-  var lessThan = parseFloat(request.query.price);
-  var limit = request.query.limit;
+  var brand = request.query.brand | undefined;
+  var lessThan = parseFloat(request.query.price | -1);
+  var limit = request.query.limit | "none";
 
   var products = await MongoClient.fetchProducts(brand, lessThan);
 
-  var result = products.slice(0, limit);
+  var result = limit === "none" ? products.slice(0, limit) : products;
 
   response.send(result);
 });
