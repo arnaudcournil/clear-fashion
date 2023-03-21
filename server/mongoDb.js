@@ -55,6 +55,7 @@ async function fetchProducts(brand = undefined, lessThan = undefined, sortedByPr
     /*
     if (scrapedLessThanTwoWeeksAgo) result = result.filter(product => new Date(product.scrapDate) > new Date(Date.now() - 14 * 24 * 60 * 60 * 1000));
     */
+   result = {brand, lessThan, sortedByPrice, sortedByDate, scrapedLessThanTwoWeeksAgo};
     return result;
 }
 
