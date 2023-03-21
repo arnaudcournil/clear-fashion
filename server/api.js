@@ -32,7 +32,7 @@ app.get('/products/search', async (request, response) => {
     var lessThan = -1;
   };
   try{
-  var limit = request.query.limit | "none";
+  var limit = request.query.limit;
   }catch(e){
     var limit = "none";
   };
