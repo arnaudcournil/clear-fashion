@@ -8,7 +8,7 @@ var client, db, collection;
 
 async function connectMongoDb(){
     //test if auth.json exists
-    if (!fs.existsSync('auth.json')) {
+    if (fs.existsSync('auth.json')) {
         var auth = fs.readFileSync('auth.json');
         auth = JSON.parse(auth);
         MONGODB_URI = auth.MONGODB_URI;
