@@ -44,7 +44,7 @@ async function fetchProducts(brand = null, lessThan = null, sortedByPrice = fals
     var query = {};
     if (brand != null) query.brand = brand;
     if (lessThan != null) query.price = {$lt: lessThan};
-    return query;
+
     result = await collection.find(query);
     /*
     if (sortedByPrice) result = result.sort({price: 1});
