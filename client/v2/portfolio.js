@@ -75,12 +75,6 @@ const fetchProducts = async (page = 1, size = 12, brand = "All", sortBy = "price
       result = body.data.result;
       brands = await getBrands();
       localStorage.setItem("clearfashion-data", JSON.stringify({result: result, fetchDate: new Date(Date.now()), brands: brands}));
-      if(result.filter(product => (new Date() - new Date(product.scrapDate)) / (1000 * 60 * 60 * 24) < 14) == 0)
-      {
-        setTimeout(await fetch(
-          `https://clear-fashion-pied.vercel.app/update`
-        ), 1);
-      }
     } else {
       result = data.result;
       brands = data.brands;
