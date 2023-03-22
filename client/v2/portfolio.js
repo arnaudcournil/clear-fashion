@@ -13,19 +13,10 @@ This endpoint accepts the following optional query string parameters:
 - `size` - number of products to return
 
 GET https://clear-fashion-api.vercel.app/brands
+https://clear-fashion-pied.vercel.app/brands
 
 Search for available brands list
 */
-
-// current products on the page
-let currentProducts = [];
-let currentPagination = {};
-let brandsCount = 0;
-let recentProducts = 0;
-let lastRelease = NaN;
-let p50 = 0;
-let p90 = 0;
-let p95 = 0;
 
 // instantiate the selectors
 const selectShow = document.querySelector('#show-select');
@@ -38,6 +29,19 @@ const showOnlySelectSale = document.querySelector('#showOnly-select-sale');
 const showOnlySelectNew = document.querySelector('#showOnly-select-new');
 const showOnlySelectFavorite = document.querySelector('#showOnly-select-favorite');
 const productDiv = document.querySelectorAll(".product");
+
+// current products on the page
+let currentProducts = [];
+let currentPagination = {};
+let brandsCount = 0;
+let recentProducts = 0;
+let lastRelease = NaN;
+let p50 = 0;
+let p90 = 0;
+let p95 = 0;
+let brands = [];
+let firstRenderBrands = true;
+let favoritesChecked = false;
 
 /**
  * Set global value
@@ -55,29 +59,60 @@ const setCurrentProducts = ({result, meta}) => {
  * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
-const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price-asc", filter = [false, false, false]) => {
+const fetchProducts = async (page = 1, size = 12, brand = "All", sortBy = "price-asc", filter = [false, false, false]) => {
   try {
-    const response = await fetch(
-      `https://clear-fashion-api.vercel.app?size=999` + (brand !== "all" ? `&brand=${brand}` : "")
-    );
-    const body = await response.json();
-
-    if (body.success !== true) {
-      console.error(body);
-      return {currentProducts, currentPagination};
+    var data = (JSON.parse(localStorage.getItem("clearfashion-data")) || [])
+    var result = [];
+    if(data.length == 0 || new Date(data.fetchDate).toISOString().split("T")[0] != new Date(Date.now()).toISOString().split("T")[0]) {
+      const response = await fetch(
+        `https://clear-fashion-pied.vercel.app/`
+      );
+      const body = await response.json();
+      if (body.success !== true) {
+        console.error(body);
+        return {currentProducts, currentPagination};
+      }
+      result = body.data.result;
+      brands = await getBrands();
+      localStorage.setItem("clearfashion-data", JSON.stringify({result: result, fetchDate: new Date(Date.now()), brands: brands}));
+    } else {
+      result = data.result;
+      brands = data.brands;
     }
-    var result = body.data.result;
-    
+    if(firstRenderBrands) {
+      renderBrands(brands);
+      firstRenderBrands = false;
+    }
+    result = brand !== "All" ? result.filter(product => product.brand === brand) : result;
+    var fav = (JSON.parse(localStorage.getItem("favorites")) || []);
+    /* old way to fetch favorites
+    if(fav.length <= 10 && filter[2]) {
+      result = fav.map(async id => {
+        const response = await fetch(
+          `https://clear-fashion-pied.vercel.app/products/` + id
+        );
+        const body = await response.json();
+        if (body.success !== true) {
+          console.error(body);
+          return {currentProducts, currentPagination};
+        }
+        console.log(body.data.result[0]);
+        return body.data.result[0];
+      }
+      );
+      result = await Promise.all(result);
+    }
+    */
     // filters
     if(filter[0]) {
       result = result.filter(product => product.price < 50);
     }
     if(filter[1]) {
-      result = result.filter(product => (new Date() - new Date(product.released)) / (1000 * 60 * 60 * 24) < 14);
+      result = result.filter(product => (new Date() - new Date(product.scrapDate)) / (1000 * 60 * 60 * 24) < 14);
     }
-    if(filter[2]) {
-      result = result.filter(product => (JSON.parse(localStorage.getItem("favorites")) || []).includes(product.uuid));
-    };
+    if(filter[2]){
+      result = result.filter(product => fav.includes(product._id));
+    }
 
     var meta = {
       currentPage: page,
@@ -93,10 +128,10 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
       result.sort((a, b) => b.price - a.price);
     }
     else if(sortBy === "date-asc") {
-      result.sort((a, b) => new Date(b.released) - new Date(a.released));
+      result.sort((a, b) => new Date(b.scrapDate) - new Date(a.scrapDate));
     }
     else if(sortBy === "date-desc") {
-      result.sort((a, b) => new Date(a.released) - new Date(b.released));
+      result.sort((a, b) => new Date(a.scrapDate) - new Date(b.scrapDate));
     }
 
     brandsCount = 0
@@ -110,11 +145,11 @@ const fetchProducts = async (page = 1, size = 12, brand = "all", sortBy = "price
       }, {});
     };
 
-    recentProducts = result.filter(product => (new Date() - new Date(product.released)) / (1000 * 60 * 60 * 24) < 14).length;
+    recentProducts = result.filter(product => (new Date() - new Date(product.scrapDate)) / (1000 * 60 * 60 * 24) < 14).length;
 
     lastRelease = result.length > 0 ? result.reduce(function(a,b) {
-      return new Date(a.released) > new Date(b.released) ? a : b;
-    }).released : "Nan";
+      return new Date(a.scrapDate) > new Date(b.scrapDate) ? a : b;
+    }).scrapDate : "Nan";
 
     if(result.length > 0)
     {
@@ -150,19 +185,24 @@ const renderProducts = products => {
     .map(product => {
       i++;
       return `
-      <div class="product" id=${product.uuid}>
-        <span>${product.brand}</span>
-        <a href="${product.link}" target="_blank">${product.name}</a>
-        <span>${product.price} </span><span id="${product.uuid}-fav">`
-      + ((JSON.parse(localStorage.getItem("favorites")) || []).includes(product.uuid) ? `❤️ <button onclick=deleteToFavorite("` + product.uuid + `")>Delete from favorite</button>` : `<button onclick=addToFavorite(currentProducts[${i}].uuid)>Add to favorite</button>`) + `
-      </span></div>
+      <div class="product" id=${product._id}>
+        <a href="${product.link}" target="_blank">
+        <img src="${product.image}" alt="${product.name}" />
+        <div class="product-info">
+        <span style="color:red">${product.brand}</span>
+        <span>${product.name}</span>
+        <span style="font-weight:bold">${product.price != null ? product.price + " €" : ""}</span></a>
+        <span id="${product._id}-fav">`
+      + ((JSON.parse(localStorage.getItem("favorites")) || []).includes(product._id) ? `<button onclick="addToFavorite(currentProducts[${i}]._id)">💔 Delete from favorite</button>` : `<button onclick="addToFavorite(currentProducts[${i}]._id)">❤️ Add to favorite</button>`) + `
+      </span>
+      </div></div>
     `;
     })
     .join('');
 
   div.innerHTML = template;
   fragment.appendChild(div);
-  sectionProducts.innerHTML = '<h2>Products</h2>';
+  sectionProducts.innerHTML = '';
   sectionProducts.appendChild(fragment);
 };
 
@@ -234,10 +274,10 @@ const render = (products, pagination) => {
   renderStats();
 };
 
-async function fetchBrands() {
+async function getBrands() {
   try {
     const response = await fetch(
-      'https://clear-fashion-api.vercel.app/brands'
+      'https://clear-fashion-pied.vercel.app/brands'
     );
     const body = await response.json();
 
@@ -246,8 +286,8 @@ async function fetchBrands() {
     }
     else {
       var brands = body.data.result;
-      brands.unshift("all");
-      renderBrands(brands);
+      brands.unshift("All");
+      return brands;
     }
   } catch (error) {
     console.error(error);
@@ -258,65 +298,67 @@ function addToFavorite(product) {
   var favorites = JSON.parse(localStorage.getItem("favorites")) || [];
   favorites.push(product);
   localStorage.setItem("favorites", JSON.stringify(favorites));
-  document.getElementById(product + "-fav").innerHTML = `❤️ <button onclick=deleteToFavorite("` + product + `")>Delete from favorite</button>`;
+  document.getElementById(product + "-fav").innerHTML = `<button onclick="deleteToFavorite('` + product + `')">💔 Delete from favorite</button>`;
 }
 
 async function deleteToFavorite(product) {
   var favorites = JSON.parse(localStorage.getItem("favorites")) || [];
   favorites = favorites.filter(favorite => favorite != product);
   localStorage.setItem("favorites", JSON.stringify(favorites));
-  document.getElementById(product + "-fav").innerHTML = `<button onclick=addToFavorite("` + product + `")>Add to favorite</button>`;
-  if(showOnlySelectFavorite.checked){
-    const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, showOnlySelectFavorite.checked]);
+  document.getElementById(product + "-fav").innerHTML = `<button onclick="addToFavorite('` + product + `')">❤️ Add to favorite</button>`;
+  if(favoritesChecked){
+    const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, favoritesChecked]);
     setCurrentProducts(products);
     render(currentProducts, currentPagination);
   }
 }
 
+async function changeFavorites() {
+  showOnlySelectFavorite.innerHTML = favoritesChecked ? "Show favorites" : "Show all";
+  favoritesChecked = !favoritesChecked;
+  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, favoritesChecked]);
+
+  setCurrentProducts(products);
+  render(currentProducts, currentPagination);
+}
+
 selectShow.addEventListener('change', async (event) => {
-  const products = await fetchProducts(1, parseInt(event.target.value), brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, showOnlySelectFavorite.checked]);
+  const products = await fetchProducts(1, parseInt(event.target.value), brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, favoritesChecked]);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
 
 selectPage.addEventListener('change', async (event) => {
-  const products = await fetchProducts(parseInt(event.target.value), currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, showOnlySelectFavorite.checked]);
+  const products = await fetchProducts(parseInt(event.target.value), currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, favoritesChecked]);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
 
 brandSelect.addEventListener('change', async (event) => {
-  const products = await fetchProducts(1, currentPagination.pageSize, event.target.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, showOnlySelectFavorite.checked]);
+  const products = await fetchProducts(1, currentPagination.pageSize, event.target.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, favoritesChecked]);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
 
 sortSelect.addEventListener('change', async (event) => {
-  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, event.target.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, showOnlySelectFavorite.checked]);
-
-  setCurrentProducts(products);
-  render(currentProducts, currentPagination);
-});
-
-showOnlySelectFavorite.addEventListener('change', async (event) => {
-  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, event.target.checked]);
+  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, event.target.value, [showOnlySelectSale.checked, showOnlySelectNew.checked, favoritesChecked]);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
 
 showOnlySelectSale.addEventListener('change', async (event) => {
-  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [event.target.checked, showOnlySelectNew.checked, showOnlySelectFavorite.checked]);
+  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [event.target.checked, showOnlySelectNew.checked, favoritesChecked]);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
 
 showOnlySelectNew.addEventListener('change', async (event) => {
-  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, event.target.checked, showOnlySelectFavorite.checked]);
+  const products = await fetchProducts(1, currentPagination.pageSize, brandSelect.value, sortSelect.value, [showOnlySelectSale.checked, event.target.checked,favoritesChecked]);
 
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
@@ -330,5 +372,3 @@ document.addEventListener('DOMContentLoaded', async () => {
   setCurrentProducts(products);
   render(currentProducts, currentPagination);
 });
-
-fetchBrands();

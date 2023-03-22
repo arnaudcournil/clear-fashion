@@ -17,22 +17,12 @@
         </select>
       </div>
       <div id="page">
-        <label for="page-select">Go to page:</label>
+        <label for="page-select">Page:</label>
         <select name="page" id="page-select"></select>
       </div>
-      <div id="filters">
-        <div id="showOnly">
-          <label>Show only:</label>
-          <input type="checkbox" id="showOnly-select-sale">Reasonable price (i.e less than 50€)</input>
-          <input type="checkbox" id="showOnly-select-new">
-            Recently released (i.e less than 2 weeks)
-          </input>
-          <input type="checkbox" id="showOnly-select-favorite">Favorite</input>
-        </div>
-        <div id="brand">
-          <label for="brand-select">By brands:</label>
-          <select name="brand" id="brand-select"></select>
-        </div>
+      <div id="brand">
+        <label for="brand-select">Brand:</label>
+        <select name="brand" id="brand-select"></select>
       </div>
       <div id="sort">
         <label for="sort-select">Sort:</label>
@@ -43,9 +33,19 @@
           <option value="date-desc">Anciently released</option>
         </select>
       </div>
+      <div>
+      <input type="checkbox" id="showOnly-select-sale">Reasonable price<br>(less than 50€)</input>
+      </div>
+      <div>
+      <input type="checkbox" id="showOnly-select-new">
+        Recently released<br>(less than 2 weeks)
+      </input>
+      </div>
+      <div id="showOnly-select-favorite" onclick="changeFavorites()">Show favorites
+      </div>
     </section>
+    <br>
     <section id="indicators">
-      <h2>Indicators</h2>
       <div>
         <span>Number of products</span>
         <span id="nbProducts">0</span>
