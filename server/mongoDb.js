@@ -66,10 +66,19 @@ async function fetchProductsByUuid(uuid){
     return result;
 }
 
+async function getBrands(){
+    await connectMongoDb();
+    console.log('Fetching brands from MongoDB ...');
+    var result = "none";
+    result = await collection.distinct("brand").toArray();
+    return result;
+}
+
 module.exports = {
     productsPushMongoDb,
     fetchProducts,
-    fetchProductsByUuid
+    fetchProductsByUuid,
+    getBrands
 }
 //productsPushMongoDb();
 //fetchProducts("Dedicated", 10 ,true, false, false);//brand, lessThan, sortedByPrice, sortedByDate, scrapedLessThanTwoWeeksAgo

@@ -55,6 +55,14 @@ app.get('/products/*', async (request, response) => {
   response.send(product);
 });
 
+app.get('/brands', async (request, response) => {
+  console.log("Requete : /brands, params : ", request.query);
+
+  var brands = await MongoClient.getBrands();
+
+  response.send(brands);
+});
+
 app.listen(PORT);
 
 console.log(`📡 Running on port ${PORT}`);
