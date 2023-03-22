@@ -67,7 +67,7 @@ app.get('/products/*', async (request, response) => {
   var product = await MongoClient.fetchProductsByUuid(id);
 
   body.data = {}
-  body.data.result = result;
+  body.data.result = product;
 
   response.send(body);
 });
