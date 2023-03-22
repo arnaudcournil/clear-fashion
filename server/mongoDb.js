@@ -70,11 +70,7 @@ async function getBrands(){
     await connectMongoDb();
     console.log('Fetching brands from MongoDB ...');
     var result = "none";
-    result = await  collection.distinct("brand", {_id: "8b669e36d663a7008de051df5efb72af"}, function(err, result) {
-        if (err) throw err;
-        console.log(result);
-        client.close();
-      });
+    result = await collection.distinct("brand");
     return result;
 }
 
