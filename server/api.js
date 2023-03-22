@@ -30,6 +30,7 @@ app.get('', async(request, response) => {
   var result = products;
   var result = limit !== null ? products.slice(0, limit) : products;
 
+  body.data = {}
   body.data.result = result;
 
   response.send(body);
@@ -50,6 +51,7 @@ app.get('/products/search', async (request, response) => {
   var result = products;
   var result = limit !== null ? products.slice(0, limit) : products;
 
+  body.data = {}
   body.data.result = result;
 
   response.send(body);
@@ -64,7 +66,9 @@ app.get('/products/*', async (request, response) => {
 
   var product = await MongoClient.fetchProductsByUuid(id);
 
-  body.data.result = product;
+  body.data = {}
+  body.data.result = result;
+
   response.send(body);
 });
 
@@ -75,7 +79,9 @@ app.get('/brands', async (request, response) => {
 
   var brands = await MongoClient.getBrands();
 
-  body.data.result = brands;
+  body.data = {}
+  body.data.result = result;
+  
   response.send(body);
 });
 
