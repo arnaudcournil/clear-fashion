@@ -62,10 +62,7 @@ async function fetchProductsByUuid(uuid){
     await connectMongoDb();
     console.log('Fetching products from MongoDB ...');
     var result = "none";
-    result = uuid.split(",")
-    for (var i = 0; i < result.length; i++) {
-        result[i] = await collection.find({_id: result[i]}).toArray()[0];
-    }
+    result = await collection.find({_id: uuid}).toArray();
     return result;
 }
 
