@@ -84,6 +84,16 @@ app.get('/brands', async (request, response) => {
   response.send(body);
 });
 
+app.get('/update', async (request, response) => {
+  console.log("Requete : /update, params : ", request.query);
+  var body = {}
+  body.success = true;
+
+  await MongoClient.productsPushMongoDb();
+
+  response.send(body);
+});
+
 app.listen(PORT);
 
 console.log(`📡 Running on port ${PORT}`);
