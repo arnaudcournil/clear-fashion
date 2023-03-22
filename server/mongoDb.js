@@ -66,6 +66,7 @@ async function fetchProductsByUuid(uuid){
     for (var i = 0; i < result.length; i++) {
         result[i] = await collection.find({_id: uuid}).toArray()[0];
     }
+    result = await Promise.all(result);
     return result;
 }
 
