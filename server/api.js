@@ -74,15 +74,13 @@ app.get('/products/*', async (request, response) => {
 
 app.get('/brands', async (request, response) => {
   console.log("Requete : /brands, params : ", request.query);
-  response.setHeader('Access-Control-Allow-Origin', '*');
   var body = {}
   body.success = true;
 
   var brands = await MongoClient.getBrands();
 
   body.data = {}
-  body.data.result = result;
-
+  body.data.result = brands;
   response.send(body);
 });
 
