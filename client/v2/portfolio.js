@@ -64,6 +64,7 @@ const fetchProducts = async (page = 1, size = 12, brand = "All", sortBy = "price
     var data = (JSON.parse(localStorage.getItem("clearfashion-data")) || [])
     var result = [];
     if(data.length == 0 || new Date(data.fetchDate).toISOString().split("T")[0] != new Date(Date.now()).toISOString().split("T")[0]) {
+      //update products every day
       const response = await fetch(
         `https://clear-fashion-pied.vercel.app/`
       );
