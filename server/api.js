@@ -74,6 +74,7 @@ app.get('/products/*', async (request, response) => {
 
 app.get('/brands', async (request, response) => {
   console.log("Requete : /brands, params : ", request.query);
+  response.setHeader('Access-Control-Allow-Origin', '*');
   var body = {}
   body.success = true;
 
@@ -81,7 +82,7 @@ app.get('/brands', async (request, response) => {
 
   body.data = {}
   body.data.result = result;
-  
+
   response.send(body);
 });
 
