@@ -77,6 +77,15 @@
     </section>
     <br>
     <section id="products"></section>
+    <script>
+      function loadInfo()
+      {
+      if(document.getElementById("products").innerHTML == ""){
+        document.getElementById("products").innerHTML = "First load, please wait...";
+      }
+    }
+    setTimeout(loadInfo, 200);
+    </script>
     <script type="text/javascript" charset="UTF-8" src="portfolio.js"></script>
   </body>
 </html>

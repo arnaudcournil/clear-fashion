@@ -8,16 +8,17 @@ var MONGODB_URI = "";
 const MONGODB_DB_NAME = 'clearfashion';
 var client, db, collection;
 
-async function connectMongoDb(){
-    MONGODB_URI = process.env.mongoDB;
+async function connectMongoDb(connexion = "none"){
+    if(connexion == "none") MONGODB_URI = process.env.mongoDB;
+    else MONGODB_URI = connexion;
     console.log('Connecting to MongoDB ...');
     client = await MongoClient.connect(MONGODB_URI, {'useNewUrlParser': true});
     db =  client.db(MONGODB_DB_NAME)
     collection = db.collection('products');
 }
 
-async function productsPushMongoDb(){
-    await connectMongoDb();
+async function productsPushMongoDb(connexion){
+    await connectMongoDb(connexion);
     console.log('Pushing new products to MongoDB ...');
     let products = await sandbox.sandbox();
     products.map(product => {
