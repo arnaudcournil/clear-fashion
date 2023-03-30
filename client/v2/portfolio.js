@@ -194,7 +194,7 @@ const renderProducts = products => {
         <span>${product.name}</span>
         <span style="font-weight:bold">${product.price != null ? product.price + " €" : ""}</span></a>
         <span id="${product._id}-fav">`
-      + ((JSON.parse(localStorage.getItem("favorites")) || []).includes(product._id) ? `<button onclick="addToFavorite(currentProducts[${i}]._id)">💔 Delete from favorite</button>` : `<button onclick="addToFavorite(currentProducts[${i}]._id)">❤️ Add to favorite</button>`) + `
+      + ((JSON.parse(localStorage.getItem("favorites")) || []).includes(product._id) ? `<button onclick="deleteToFavorite(currentProducts[${i}]._id)">💔 Delete from favorite</button>` : `<button onclick="addToFavorite(currentProducts[${i}]._id)">❤️ Add to favorite</button>`) + `
       </span>
       </div></div>
     `;
